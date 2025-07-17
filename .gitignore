@@ -1,0 +1,55 @@
+# === 기본 문서 ===
+HELP.md
+
+# === Maven 빌드 ===
+target/
+.mvn/wrapper/maven-wrapper.jar
+
+# (예외적으로 소스 디렉토리 내 target, build 폴더는 포함하지 않음)
+# → 이 예외는 일반적으로 불필요하므로 제거
+# !**/src/main/**/target/
+# !**/src/test/**/target/
+
+# === STS / Eclipse ===
+.apt_generated/
+.classpath
+.factorypath
+.project
+.settings/
+.springBeans/
+.sts4-cache/
+
+# === IntelliJ IDEA ===
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# === NetBeans (사용하지 않으면 생략 가능하지만 혹시 모르니 유지) ===
+nbproject/private/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+# === VS Code ===
+.vscode/
+
+# === 운영체제 및 임시파일 ===
+*.log
+*.tmp
+*.bak
+*.swp
+.DS_Store
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# === 출력파일 및 결과물 ===
+*.pdf  # PDF 결과물은 보통 산출물이므로 무시 (원할 경우 특정 경로만 예외로)
+uploads/
+generated-pdfs/
+
+# === 환경파일 ===
+.env
+*.local
