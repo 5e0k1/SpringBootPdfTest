@@ -112,30 +112,4 @@ public class HtmlPdfController {
         }
     }
     
-    /**
-     * 간단한 HTML을 PDF로 변환
-     */
-    @PostMapping("/simple")
-    public ResponseEntity<byte[]> generateSimplePdf(@RequestParam("htmlContent") String htmlContent,
-                                                   @RequestParam(value = "cssContent", required = false) String cssContent) {
-        
-        log.info("간단한 PDF 생성 요청 - HTML 길이: {}", htmlContent != null ? htmlContent.length() : 0);
-        
-        try {
-            // 간단한 HTML to PDF 변환
-            byte[] pdfBytes = htmlToPdfService.convertSimpleHtmlToPdf(htmlContent, cssContent);
-            
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_PDF);
-            headers.setContentDispositionFormData("attachment", "simple-document.pdf");
-            headers.setContentLength(pdfBytes.length);
-            
-            log.info("간단한 PDF 생성 성공 - 파일 크기: {} bytes", pdfBytes.length);
-            
-            return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
-        } catch (Exception e) {
-            log.error("간단한 PDF 생성 실패", e);
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
 }

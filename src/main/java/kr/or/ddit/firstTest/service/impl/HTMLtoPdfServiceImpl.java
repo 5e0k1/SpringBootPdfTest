@@ -3,6 +3,9 @@ package kr.or.ddit.firstTest.service.impl;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.core.io.ClassPathResource;
@@ -49,6 +52,7 @@ public class HTMLtoPdfServiceImpl implements HTMLtoPdfService {
             
             // HTML 문서 설정
             renderer.setDocumentFromString(fullHtml);
+            // 설정된 문서를 위치 줄바꿈 폰트 페이지분할 등 계산하여 적용
             renderer.layout();
             
             // PDF 생성
@@ -244,38 +248,50 @@ public class HTMLtoPdfServiceImpl implements HTMLtoPdfService {
     private void setupKoreanFonts(ITextRenderer renderer) {
         try {
             ITextFontResolver fontResolver = renderer.getFontResolver();
-            
-            // Windows 폰트 시도
-            File windowsFont = new File(DEFAULT_FONT_PATH);
-            if (windowsFont.exists()) {
-                fontResolver.addFont(DEFAULT_FONT_PATH, BaseFont.IDENTITY_H, BaseFont.NOT_EMBEDDED);
-                System.out.println("Windows 폰트 로드 성공: " + DEFAULT_FONT_PATH);
-                return;
+
+            // 기본 폰트 경로들 목록
+            List<String> fontPaths = new ArrayList<>();
+
+            // OS별 기본 폰트
+            if (new File(DEFAULT_FONT_PATH).exists()) {
+                fontPaths.add(DEFAULT_FONT_PATH); // 예: "C:/Windows/Fonts/malgun.ttf"
             }
-            
-            // macOS 폰트 시도
-            File macFont = new File(MAC_FONT_PATH);
-            if (macFont.exists()) {
-                fontResolver.addFont(MAC_FONT_PATH, BaseFont.IDENTITY_H, BaseFont.NOT_EMBEDDED);
-                System.out.println("macOS 폰트 로드 성공: " + MAC_FONT_PATH);
-                return;
+            if (new File(MAC_FONT_PATH).exists()) {
+                fontPaths.add(MAC_FONT_PATH); // 예: "/System/Library/Fonts/AppleGothic.ttf"
             }
-            
-            // 클래스패스 리소스 폰트 시도
-            try {
-                ClassPathResource resource = new ClassPathResource(RESOURCE_FONT_PATH);
-                if (resource.exists()) {
-                    fontResolver.addFont(resource.getFile().getAbsolutePath(), 
-                                       BaseFont.IDENTITY_H, BaseFont.NOT_EMBEDDED);
-                    System.out.println("리소스 폰트 로드 성공: " + RESOURCE_FONT_PATH);
-                    return;
+
+            // 클래스패스 리소스 폰트들 추가
+            // 혹시나 사용하고 싶은 폰트가 있으면 파일 다운로드 받아서 resources/fonts 경로에 추가하고 아래에 String값 한줄 추가
+            List<String> resourceFonts = Arrays.asList(
+                "fonts/NanumGothic.ttf",
+                "/fonts/JejuGothic.ttf",
+                "fonts/폰트파일명"			// 이런식으로 한줄 추가하면됨
+            );
+            for (String path : resourceFonts) {
+                try {
+                    ClassPathResource resource = new ClassPathResource(path);
+                    if (resource.exists()) {
+                        fontPaths.add(resource.getFile().getAbsolutePath());
+                    }
+                } catch (IOException e) {
+                    System.err.println("리소스 폰트 로드 실패: " + path + " → " + e.getMessage());
                 }
-            } catch (Exception e) {
-                System.err.println("리소스 폰트 로드 실패: " + e.getMessage());
             }
+
             
-            System.out.println("한글 폰트를 찾을 수 없습니다. 기본 폰트를 사용합니다.");
-            
+            // 최종 폰트 등록
+            if (!fontPaths.isEmpty()) {
+            	int seq = 1;
+                for (String path : fontPaths) {
+                    fontResolver.addFont(path, BaseFont.IDENTITY_H, BaseFont.NOT_EMBEDDED);
+                    BaseFont baseFont = BaseFont.createFont(path, BaseFont.IDENTITY_H, BaseFont.NOT_EMBEDDED);
+                    System.out.println(seq+++". 폰트 로드 성공: " + path);                    // 본인이 적용한 폰트가 잘 로드 되었는지 확인
+                    System.out.println("Full Name: " + baseFont.getFullFontName()[0][3]);      // NanumGothic 여기에 나오는 이름으로 css에 font-family 적용
+                }
+            } else {
+                System.out.println("한글 폰트를 찾을 수 없습니다. 기본 폰트를 사용합니다.");
+            }
+
         } catch (Exception e) {
             System.err.println("폰트 설정 중 오류: " + e.getMessage());
         }
